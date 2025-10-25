@@ -31,10 +31,21 @@ Webhook服务支持以下命令行参数：
 python3 webhook_server.py --help
 ```
 
-- `--log-level`: 设置日志等级 (DEBUG, INFO, WARNING, ERROR, CRITICAL)，默认为INFO
-- `--host`: 服务监听地址，默认为0.0.0.0
-- `--port`: 服务端口，默认为5000
-- `--api-key`: API密钥，用于验证客户端身份（可选）
+```
+usage: webhook_server.py [-h]
+                         [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+                         [--host HOST] [--port PORT] [--api-key API_KEY]
+
+Webhook服务，用于接收邮件发送请求
+
+options:
+  -h, --help            show this help message and exit
+  --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                        设置日志等级 (默认: INFO)
+  --host HOST           服务监听地址 (默认: 0.0.0.0)
+  --port PORT           服务端口 (默认: 5000)
+  --api-key API_KEY     API密钥，用于验证客户端身份
+```
 
 ### 使用示例
 
