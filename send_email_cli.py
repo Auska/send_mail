@@ -7,7 +7,9 @@ import argparse
 import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 from email.header import Header
+from email import encoders
 
 # 默认发件人配置
 DEFAULT_SENDER = "luodan0709@foxmail.com"  # ← 修改为你的邮箱
@@ -15,10 +17,11 @@ SMTP_SERVER = "smtp.qq.com"
 SMTP_PORT = 587
 
 
-def send_email(sender, password, recipient, subject, text_body, html_body=None):
+def send_email(sender, password, recipient, subject, text_body, html_body=None, attachments=None):
     """
     发送单封邮件给一个收件人
     :param recipient: 单个收件人邮箱字符串
+    :param attachments: 附件文件路径列表
     """
     # 创建邮件对象
     msg = MIMEMultipart()
@@ -30,6 +33,23 @@ def send_email(sender, password, recipient, subject, text_body, html_body=None):
     msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
     if html_body:
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+
+    # 添加附件
+    if attachments:
+        for file_path in attachments:
+            if os.path.isfile(file_path):
+                with open(file_path, "rb") as attachment:
+                    part = MIMEBase('application', 'octet-stream')
+                    part.set_payload(attachment.read())
+
+                encoders.encode_base64(part)
+                part.add_header(
+                    'Content-Disposition',
+                    f'attachment; filename= {os.path.basename(file_path)}'
+                )
+                msg.attach(part)
+            else:
+                print(f"⚠️  警告：附件文件不存在：{file_path}")
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
@@ -70,6 +90,9 @@ def main():
 
     parser.add_argument('--auth', help='授权码（推荐通过环境变量 EMAIL_PASS 设置）')
 
+    parser.add_argument('-f', '--files', dest='files',
+                        help='附件文件路径，多个用英文逗号分隔，例如：file1.txt,file2.pdf')
+
     args = parser.parse_args()
 
     # 解析收件人列表
@@ -85,6 +108,11 @@ def main():
         getpass.getpass(f"🔐 请输入邮箱 '{args.sender}' 的授权码: ")
     )
 
+    # 解析附件列表
+    attachments = []
+    if args.files:
+        attachments = [path.strip() for path in args.files.split(',') if path.strip()]
+
     if not password:
         print("❌ 错误：未提供授权码，无法发送邮件。")
         exit(1)
@@ -98,7 +126,8 @@ def main():
             recipient=recipient,
             subject=args.subject,
             text_body=args.message,
-            html_body=args.html
+            html_body=args.html,
+            attachments=attachments
         ):
             success_count += 1
 
