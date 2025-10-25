@@ -5,6 +5,7 @@ import smtplib
 import getpass
 import argparse
 import os
+import markdown
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -84,6 +85,8 @@ def main():
                         help='纯文本正文内容（默认：测试文本）')
 
     parser.add_argument('--html', help='HTML 格式正文内容（可选）')
+    
+    parser.add_argument('--md', help='Markdown 格式正文文件路径（可选）')
 
     parser.add_argument('--from', dest='sender', default=DEFAULT_SENDER,
                         help=f'发件人邮箱（默认：{DEFAULT_SENDER}）')
@@ -113,6 +116,22 @@ def main():
     if args.files:
         attachments = [path.strip() for path in args.files.split(',') if path.strip()]
 
+    # 处理 Markdown 文件
+    html_body = args.html
+    text_body = args.message
+    
+    if args.md:
+        if os.path.isfile(args.md):
+            with open(args.md, 'r', encoding='utf-8') as f:
+                md_content = f.read()
+                html_body = markdown.markdown(md_content)
+                # 如果没有提供纯文本内容，则使用 Markdown 内容作为纯文本
+                if not args.message or args.message == '这是一封测试邮件。':
+                    text_body = md_content
+        else:
+            print(f"❌ 错误：Markdown 文件不存在：{args.md}")
+            exit(1)
+
     if not password:
         print("❌ 错误：未提供授权码，无法发送邮件。")
         exit(1)
@@ -125,8 +144,8 @@ def main():
             password=password,
             recipient=recipient,
             subject=args.subject,
-            text_body=args.message,
-            html_body=args.html,
+            text_body=text_body,
+            html_body=html_body,
             attachments=attachments
         ):
             success_count += 1

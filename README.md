@@ -12,7 +12,11 @@
 ## 使用方法
 
 ```bash
+# 发送普通文本邮件
 python3 send_email_cli.py -t "recipient@example.com" -s "邮件主题" -m "邮件正文"
+
+# 发送 Markdown 文件作为邮件正文
+python3 send_email_cli.py -t "recipient@example.com" -s "邮件主题" --md "邮件内容.md"
 ```
 
 ### 参数说明
@@ -21,6 +25,7 @@ python3 send_email_cli.py -t "recipient@example.com" -s "邮件主题" -m "邮�
 - `-s`, `--subject`: 邮件主题（默认：无主题）
 - `-m`, `--message`: 纯文本正文内容（默认：这是一封测试邮件。）
 - `--html`: HTML 格式正文内容（可选）
+- `--md`: Markdown 格式正文文件路径（可选）
 - `--from`: 发件人邮箱（默认：luodan0709@foxmail.com）
 - `--auth`: 授权码（推荐通过环境变量 EMAIL_PASS 设置）
 
