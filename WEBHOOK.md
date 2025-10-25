@@ -34,6 +34,7 @@ python3 webhook_server.py --help
 - `--log-level`: 设置日志等级 (DEBUG, INFO, WARNING, ERROR, CRITICAL)，默认为INFO
 - `--host`: 服务监听地址，默认为0.0.0.0
 - `--port`: 服务端口，默认为5000
+- `--api-key`: API密钥，用于验证客户端身份（可选）
 
 ### 使用示例
 
@@ -46,6 +47,9 @@ python3 webhook_server.py --port 8080
 
 # 在特定地址和端口启动服务
 python3 webhook_server.py --host 127.0.0.1 --port 8080
+
+# 设置API密钥
+python3 webhook_server.py --api-key your_secret_api_key
 ```
 
 ### 环境变量说明
@@ -74,6 +78,7 @@ python3 webhook_server.py --host 127.0.0.1 --port 8080
 ```bash
 curl -X POST http://localhost:5000/send_email \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_api_key" \
   -d '{
     "to": ["recipient1@example.com", "recipient2@example.com"],
     "subject": "测试邮件",
@@ -88,6 +93,7 @@ curl -X POST http://localhost:5000/send_email \
 ```bash
 curl -X POST http://localhost:5000/send_email \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_api_key" \
   -d '{
     "to": ["recipient@example.com"],
     "subject": "Markdown测试邮件",
@@ -122,7 +128,7 @@ curl -X POST http://localhost:5000/send_email \
 #### 请求示例
 
 ```bash
-curl http://localhost:5000/health
+curl -H "X-API-Key: your_api_key" http://localhost:5000/health
 ```
 
 #### 响应示例
@@ -172,4 +178,5 @@ python3 webhook_server.py --log-level DEBUG
 - 请确保通过HTTPS访问Webhook端点
 - 合理限制请求频率，防止滥用
 - 妥善保管邮箱授权码，不要在代码中硬编码
+- 妥善保管API密钥，避免泄露
 - 考虑添加IP白名单或请求认证机制

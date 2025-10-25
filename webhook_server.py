@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 import argparse
+from functools import wraps
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -21,6 +22,7 @@ def parse_arguments():
                         help='设置日志等级 (默认: INFO)')
     parser.add_argument('--host', default='0.0.0.0', help='服务监听地址 (默认: 0.0.0.0)')
     parser.add_argument('--port', type=int, default=5000, help='服务端口 (默认: 5000)')
+    parser.add_argument('--api-key', help='API密钥，用于验证客户端身份')
     return parser.parse_args()
 
 # 解析命令行参数
@@ -37,6 +39,26 @@ SMTP_SERVER = "smtp.qq.com"
 SMTP_PORT = 587
 
 app = Flask(__name__)
+
+# 全局变量存储命令行参数
+global_args = args
+
+# API密钥验证装饰器
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # 如果没有设置API密钥，则跳过验证
+        if not global_args.api_key:
+            return f(*args, **kwargs)
+        
+        # 检查请求头中的API密钥
+        api_key = request.headers.get('X-API-Key')
+        if api_key and api_key == global_args.api_key:
+            return f(*args, **kwargs)
+        else:
+            logger.warning(f"API key authentication failed, IP address: {request.remote_addr}")
+            return jsonify({"error": "Unauthorized: Invalid or missing API key"}), 401
+    return decorated_function
 
 def send_email(sender, password, recipient, subject, text_body, html_body=None, attachments=None):
     """
@@ -92,10 +114,14 @@ def send_email(sender, password, recipient, subject, text_body, html_body=None, 
         return False
 
 @app.route('/send_email', methods=['POST'])
+@require_api_key
 def send_email_webhook():
     """
     Webhook端点，接收JSON格式的邮件发送请求
     """
+    # 访问全局参数
+    global global_args
+    
     try:
         # 记录请求信息
         logger.info(f"收到邮件发送请求，IP地址：{request.remote_addr}")
@@ -190,10 +216,14 @@ def send_email_webhook():
         return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/health', methods=['GET'])
+@require_api_key
 def health_check():
     """
     健康检查端点
     """
+    # 访问全局参数
+    global global_args
+    
     return jsonify({"status": "healthy"}), 200
 
 if __name__ == "__main__":
