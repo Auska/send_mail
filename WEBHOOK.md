@@ -184,6 +184,49 @@ python3 webhook_server.py --log-level DEBUG
 - 401: 认证失败（邮箱或授权码错误）
 - 500: 服务器内部错误
 
+## Docker部署
+
+本项目支持通过Docker容器化部署，提供了Dockerfile和docker-compose.yml文件。
+
+### 使用Docker直接构建
+
+```bash
+# 构建镜像
+docker build -t send-mail-webhook .
+
+# 运行容器
+docker run -d \
+  --name send-mail-webhook \
+  -p 5000:5000 \
+  -e EMAIL_PASS=your_email_password \
+  -e API_KEY=your_api_key \
+  send-mail-webhook
+```
+
+### 使用Docker Compose部署（推荐）
+
+```bash
+# 设置环境变量
+export EMAIL_PASS=your_email_password
+export API_KEY=your_api_key
+
+# 启动服务
+docker-compose up -d
+```
+
+### 环境变量说明
+
+Docker容器支持以下环境变量：
+
+- `EMAIL_PASS`: 邮箱授权码（必需）
+- `EMAIL_SENDER`: 发件人邮箱地址（可选，默认为luodan0709@foxmail.com）
+- `SMTP_SERVER`: SMTP服务器地址（可选，默认为smtp.qq.com）
+- `SMTP_PORT`: SMTP服务器端口（可选，默认为587）
+- `LOG_LEVEL`: 日志等级（可选，默认为INFO）
+- `API_KEY`: API密钥，用于验证客户端身份（可选）
+- `HOST`: 服务监听地址（可选，默认为0.0.0.0）
+- `PORT`: 服务端口（可选，默认为5000）
+
 ## 安全注意事项
 
 - 请确保通过HTTPS访问Webhook端点

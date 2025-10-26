@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  webhook-server:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - EMAIL_SENDER=luodan0709@foxmail.com
+      - SMTP_SERVER=smtp.qq.com
+      - SMTP_PORT=587
+      - EMAIL_PASS=${EMAIL_PASS}
+      - LOG_LEVEL=INFO
+      - API_KEY=${API_KEY}
+      - HOST=0.0.0.0
+      - PORT=5000
+    restart: unless-stopped
+    networks:
+      - webhook-network
+
+networks:
+  webhook-network:
+    driver: bridge

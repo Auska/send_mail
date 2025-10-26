@@ -115,6 +115,38 @@ python3 webhook_server.py --help
 - `--port`: 服务端口 (默认: 5000)
 - `--api-key`: API密钥，用于验证客户端身份
 
+### Docker部署
+
+本项目支持通过Docker容器化部署，提供了Dockerfile和docker-compose.yml文件。
+
+#### 使用Docker直接构建
+
+```bash
+# 构建镜像
+docker build -t send-mail-webhook .
+
+# 运行容器
+docker run -d \
+  --name send-mail-webhook \
+  -p 5000:5000 \
+  -e EMAIL_PASS=your_email_password \
+  -e API_KEY=your_api_key \
+  send-mail-webhook
+```
+
+#### 使用Docker Compose部署（推荐）
+
+```bash
+# 设置环境变量
+export EMAIL_PASS=your_email_password
+export API_KEY=your_api_key
+
+# 启动服务
+docker-compose up -d
+```
+
+有关环境变量的详细信息，请参考 [WEBHOOK.md](WEBHOOK.md)。
+
 ### 安全注意事项
 
 - 请确保通过HTTPS访问Webhook端点
