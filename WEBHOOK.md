@@ -5,7 +5,7 @@
 - 通过HTTP请求发送邮件
 - 支持多收件人（逐个发送）
 - 支持纯文本、HTML和Markdown格式邮件内容
-- 支持邮件附件
+
 - 完整的请求日志记录
 - 健康检查端点
 
@@ -82,8 +82,6 @@ python3 webhook_server.py --api-key your_secret_api_key
 - `message` (可选): 纯文本正文内容，默认为"这是一封测试邮件。"
 - `html` (可选): HTML格式正文内容
 - `markdown_file` (可选): Markdown文件路径，将被转换为HTML
-- `attachments` (可选): 附件文件路径列表
-
 #### 请求示例
 
 ```bash
@@ -94,8 +92,7 @@ curl -X POST http://localhost:5000/send_email \
     "to": ["recipient1@example.com", "recipient2@example.com"],
     "subject": "测试邮件",
     "message": "这是一封测试邮件。",
-    "html": "<h1>测试邮件</h1><p>这是一封测试邮件。</p>",
-    "attachments": ["test_attachment.txt"]
+    "html": "<h1>测试邮件</h1><p>这是一封测试邮件。</p>"
   }'
 ```
 
@@ -108,8 +105,7 @@ curl -X POST http://localhost:5000/send_email \
   -d '{
     "to": ["recipient@example.com"],
     "subject": "Markdown测试邮件",
-    "markdown_file": "test_email.md",
-    "attachments": ["test_attachment.txt"]
+    "markdown_file": "test_email.md"
   }'
 ```
 

@@ -60,11 +60,10 @@ def require_api_key(f):
             return jsonify({"error": "Unauthorized: Invalid or missing API key"}), 401
     return decorated_function
 
-def send_email(sender, password, recipient, subject, text_body, html_body=None, attachments=None):
+def send_email(sender, password, recipient, subject, text_body, html_body=None):
     """
     发送单封邮件给一个收件人
     :param recipient: 单个收件人邮箱字符串
-    :param attachments: 附件文件路径列表
     """
     # 创建邮件对象
     msg = MIMEMultipart()
@@ -76,23 +75,6 @@ def send_email(sender, password, recipient, subject, text_body, html_body=None, 
     msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
     if html_body:
         msg.attach(MIMEText(html_body, 'html', 'utf-8'))
-
-    # 添加附件
-    if attachments:
-        for file_path in attachments:
-            if os.path.isfile(file_path):
-                with open(file_path, "rb") as attachment:
-                    part = MIMEBase('application', 'octet-stream')
-                    part.set_payload(attachment.read())
-
-                encoders.encode_base64(part)
-                part.add_header(
-                    'Content-Disposition',
-                    f'attachment; filename= {os.path.basename(file_path)}'
-                )
-                msg.attach(part)
-            else:
-                logger.warning(f"附件文件不存在：{file_path}")
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
@@ -158,10 +140,9 @@ def send_email_webhook():
         text_body = data.get('message', '这是一封测试邮件。')
         html_body = data.get('html')
         markdown_file = data.get('markdown_file')
-        attachments = data.get('attachments', [])
         
         # 记录将要执行的操作
-        logger.info(f"准备发送邮件：收件人数量={len(recipients)}, 主题='{subject}', 附件数量={len(attachments)}")
+        logger.info(f"准备发送邮件：收件人数量={len(recipients)}, 主题='{subject}'")
         
         # 处理Markdown文件
         if markdown_file:
@@ -192,8 +173,7 @@ def send_email_webhook():
                 recipient=recipient,
                 subject=subject,
                 text_body=text_body,
-                html_body=html_body,
-                attachments=attachments
+                html_body=html_body
             ):
                 success_count += 1
                 logger.info(f"成功发送邮件给：{recipient}")
