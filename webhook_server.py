@@ -18,11 +18,11 @@ import markdown
 def parse_arguments():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(description="Webhook服务，用于接收邮件发送请求")
-    parser.add_argument('--log-level', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    parser.add_argument('--log-level', default=os.getenv('LOG_LEVEL', 'INFO'), choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='设置日志等级 (默认: INFO)')
-    parser.add_argument('--host', default='0.0.0.0', help='服务监听地址 (默认: 0.0.0.0)')
-    parser.add_argument('--port', type=int, default=5000, help='服务端口 (默认: 5000)')
-    parser.add_argument('--api-key', help='API密钥，用于验证客户端身份')
+    parser.add_argument('--host', default=os.getenv('HOST', '0.0.0.0'), help='服务监听地址 (默认: 0.0.0.0)')
+    parser.add_argument('--port', type=int, default=int(os.getenv('PORT', '5000')), help='服务端口 (默认: 5000)')
+    parser.add_argument('--api-key', default=os.getenv('API_KEY'), help='API密钥，用于验证客户端身份')
     return parser.parse_args()
 
 # 解析命令行参数
@@ -33,10 +33,10 @@ log_level = getattr(logging, args.log_level.upper(), logging.INFO)
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
-# 默认发件人配置
+# 从环境变量获取配置
 DEFAULT_SENDER = os.getenv("EMAIL_SENDER", "luodan0709@foxmail.com")
-SMTP_SERVER = "smtp.qq.com"
-SMTP_PORT = 587
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.qq.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 
 app = Flask(__name__)
 
