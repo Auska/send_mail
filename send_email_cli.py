@@ -6,16 +6,21 @@ import getpass
 import argparse
 import os
 import markdown
+import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.header import Header
 from email import encoders
 
-# 默认发件人配置
-DEFAULT_SENDER = "luodan0709@foxmail.com"  # ← 修改为你的邮箱
-SMTP_SERVER = "smtp.qq.com"
-SMTP_PORT = 587
+# 配置日志级别
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+logging.basicConfig(level=LOG_LEVEL)
+
+# 从环境变量获取配置
+DEFAULT_SENDER = os.getenv("EMAIL_SENDER", "luodan0709@foxmail.com")
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.qq.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 
 
 def send_email(sender, password, recipient, subject, text_body, html_body=None, attachments=None):
@@ -54,20 +59,24 @@ def send_email(sender, password, recipient, subject, text_body, html_body=None, 
 
     try:
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.set_debuglevel(0)
+        server.set_debuglevel(1 if LOG_LEVEL == "DEBUG" else 0)
         server.starttls()
         server.login(sender, password)
         server.sendmail(sender, [recipient], msg.as_string())
         server.quit()
         print(f"✅ 邮件已发送给：{recipient}")
+        logging.info(f"邮件已发送给：{recipient}")
     except smtplib.SMTPAuthenticationError:
         print(f"❌ 认证失败：检查邮箱 '{sender}' 和授权码")
+        logging.error(f"认证失败：检查邮箱 '{sender}' 和授权码")
         exit(1)
     except smtplib.SMTPConnectError:
         print("❌ 连接失败：无法连接到 SMTP 服务器")
+        logging.error("连接失败：无法连接到 SMTP 服务器")
         exit(1)
     except Exception as e:
         print(f"❌ 发送失败给 {recipient}：{str(e)}")
+        logging.error(f"发送失败给 {recipient}：{str(e)}")
         return False
     return True
 
